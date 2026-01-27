@@ -1,7 +1,9 @@
 package guru.springframework.spring6reactive.bootstrap;
 
 import guru.springframework.spring6reactive.domain.Beer;
+import guru.springframework.spring6reactive.domain.Customer;
 import guru.springframework.spring6reactive.repositories.BeerRepository;
+import guru.springframework.spring6reactive.repositories.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
@@ -18,14 +20,40 @@ import java.time.LocalDateTime;
 public class BootStrapData implements CommandLineRunner {
 
     private final BeerRepository beerRepository;
+    private final CustomerRepository customerRepository;
 
     @Override
     public void run(String @NonNull ... args) {
         loadBeerData();
+        loadCustomerData();
+        beerRepository.count().subscribe(count -> {
+            System.out.println("Beer Count is: " + count);
+        });
 
-        beerRepository.count().subscribe(count -> System.out.println("Count is: " + count));
+        customerRepository.count().subscribe(count -> {
+            System.out.println("Customer Count is: " + count);
+        });
+    }
 
-        beerRepository.findAll().subscribe(System.out::println);
+    private void loadCustomerData() {
+        customerRepository.count().subscribe(count -> {
+            if(count == 0){
+                customerRepository.save(Customer.builder()
+                        .customerName("Customer 1")
+                        .build())
+                        .subscribe();
+
+                customerRepository.save(Customer.builder()
+                                .customerName("Customer 2")
+                                .build())
+                        .subscribe();
+
+                customerRepository.save(Customer.builder()
+                                .customerName("Customer 3")
+                                .build())
+                        .subscribe();
+            }
+        });
     }
 
     private void loadBeerData() {
